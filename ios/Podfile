@@ -1,0 +1,22 @@
+platform :ios, '13.0'
+
+target 'Runner' do
+  use_frameworks!
+  use_modular_headers!
+
+  # Flutter dependencies
+  flutter_application_path = '../'
+  # load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
+  # flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+
+  # Add your dependencies here
+  # pod 'sign_in_with_apple', '~> 6.1.0'
+end
+
+# Adding `RunnerTests` target
+target 'RunnerTests' do
+  inherit! :search_paths
+  # Add your test dependencies here
+  # For example:
+  # pod 'MyTestDependency'
+end
