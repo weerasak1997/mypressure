@@ -39,6 +39,15 @@ dependencies:
   http: ^1.2.2 # http for get push for api
   fl_chart: ^0.68.0 # graph
   image_picker: ^1.1.2
+  camera: ^0.11.0+1
+  path_provider: ^2.0.6
+  path: ^1.8.1
+  intl: ^0.18.0
+  sign_in_with_apple: ^6.1.1
+  shared_preferences: ^2.3.0
+  image: ^3.0.1
+  exif: ^2.0.2
+  provider:
 dev_dependencies:
   flutter_test:
     sdk: flutter
