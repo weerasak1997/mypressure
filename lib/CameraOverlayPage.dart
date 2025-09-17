@@ -6,6 +6,8 @@ import 'package:image/image.dart' as img;
 import 'package:exif/exif.dart';
 
 class CameraOverlayPage extends StatefulWidget {
+  const CameraOverlayPage({super.key});
+
   @override
   _CameraOverlayPageState createState() => _CameraOverlayPageState();
 }
@@ -54,6 +56,7 @@ class _CameraOverlayPageState extends State<CameraOverlayPage> {
     }
     // print('w: ' + width.toString());
     // print('H: ' + height.toString());
+
     return Center(
       child: Container(
         margin: edge,
@@ -85,23 +88,21 @@ class _CameraOverlayPageState extends State<CameraOverlayPage> {
       Map<String?, IfdTag>? data = await readExifFromFile(File(originalPath));
       if (data != null) {
         String orientation = data['Image Orientation'].toString();
-        if (orientation != null) {
-          if (orientation.contains('Rotated 90 CW')) {
-            img.Image original =
-                img.decodeImage(File(originalPath).readAsBytesSync())!;
-            img.Image fixed = img.copyRotate(original, 90);
-            File(originalPath).writeAsBytesSync(img.encodeJpg(fixed));
-          } else if (orientation.contains('Rotated 180 CW')) {
-            img.Image original =
-                img.decodeImage(File(originalPath).readAsBytesSync())!;
-            img.Image fixed = img.copyRotate(original, 180);
-            File(originalPath).writeAsBytesSync(img.encodeJpg(fixed));
-          } else if (orientation.contains('Rotated 270 CW')) {
-            img.Image original =
-                img.decodeImage(File(originalPath).readAsBytesSync())!;
-            img.Image fixed = img.copyRotate(original, 270);
-            File(originalPath).writeAsBytesSync(img.encodeJpg(fixed));
-          }
+        if (orientation.contains('Rotated 90 CW')) {
+          img.Image original =
+              img.decodeImage(File(originalPath).readAsBytesSync())!;
+          img.Image fixed = img.copyRotate(original, 90);
+          File(originalPath).writeAsBytesSync(img.encodeJpg(fixed));
+        } else if (orientation.contains('Rotated 180 CW')) {
+          img.Image original =
+              img.decodeImage(File(originalPath).readAsBytesSync())!;
+          img.Image fixed = img.copyRotate(original, 180);
+          File(originalPath).writeAsBytesSync(img.encodeJpg(fixed));
+        } else if (orientation.contains('Rotated 270 CW')) {
+          img.Image original =
+              img.decodeImage(File(originalPath).readAsBytesSync())!;
+          img.Image fixed = img.copyRotate(original, 270);
+          File(originalPath).writeAsBytesSync(img.encodeJpg(fixed));
         }
       }
     } catch (e) {
@@ -111,9 +112,10 @@ class _CameraOverlayPageState extends State<CameraOverlayPage> {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
+    double widthShow = MediaQuery.of(context).size.width;
+    double heightShow = MediaQuery.of(context).size.height;
     double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
-    width = width * devicePixelRatio;
+    double width = widthShow * devicePixelRatio;
     return Scaffold(
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
@@ -133,71 +135,36 @@ class _CameraOverlayPageState extends State<CameraOverlayPage> {
                       onPressed: () async {
                         Navigator.pop(context);
                       },
-                      child: Icon(
-                        Icons.arrow_back_ios,
-                        size: 36,
-                        color: Colors.white,
-                      ),
                       style: ElevatedButton.styleFrom(
                         shape: const CircleBorder(),
                         padding: const EdgeInsets.fromLTRB(26, 16, 16, 16),
                         backgroundColor: Colors.black
                             .withOpacity(0.7), // Button background color
                       ),
+                      child: Icon(
+                        Icons.arrow_back_ios,
+                        size: 36,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
                 // width <= 1280
                 (width <= 720
-                    ? _getOverlay(300, 145, 1, 300)
-                    : _getOverlay(240, 140, 1, 252)),
+                    ? _getOverlay((62.5 / 100) * widthShow,
+                        (14.5 / 100) * heightShow, 1, (30 / 100) * heightShow)
+                    : _getOverlay((60 / 100) * widthShow,
+                        (14 / 100) * heightShow, 1, (25.1 / 100) * heightShow)),
                 (width <= 720
-                    ? _getOverlay(300, 145, 2, 0)
-                    : _getOverlay(240, 120, 2, 0)),
+                    ? _getOverlay((62.5 / 100) * widthShow,
+                        (14.5 / 100) * heightShow, 2, 0)
+                    : _getOverlay(
+                        (60 / 100) * widthShow, (12 / 100) * heightShow, 2, 0)),
                 (width <= 720
-                    ? _getOverlay(300, 145, 3, 300)
-                    : _getOverlay(240, 120, 3, 232)),
-                // Centered square overlay
-                // Center(
-                //   child: Container(
-                //     key: _overlay_1,
-                //     margin: const EdgeInsets.only(bottom: 300),
-                //     width: 300, // Width of the square
-                //     height: 145, // Height of the square
-                //     decoration: BoxDecoration(
-                //       border: Border.all(color: Colors.green, width: 3),
-                //       borderRadius:
-                //           BorderRadius.circular(8), // Optional: rounded corners
-                //     ),
-                //   ),
-                // ),
-                // Center(
-                //   child: Container(
-                //     key: _overlay_2,
-                //     width: 300, // Width of the square
-                //     height: 145, // Height of the square
-                //     decoration: BoxDecoration(
-                //       border: Border.all(color: Colors.green, width: 3),
-                //       borderRadius:
-                //           BorderRadius.circular(8), // Optional: rounded corners
-                //     ),
-                //   ),
-                // ),
-                // Center(
-                //   child: Container(
-                //     key: _overlay_3,
-                //     margin: const EdgeInsets.only(top: 300),
-                //     width: 300, // Width of the square
-                //     height: 145, // Height of the square
-                //     decoration: BoxDecoration(
-                //       border: Border.all(color: Colors.green, width: 3),
-                //       borderRadius:
-                //           BorderRadius.circular(8), // Optional: rounded corners
-                //     ),
-                //   ),
-                // ),
-                // Centered button at the bottom
-
+                    ? _getOverlay((62.5 / 100) * widthShow,
+                        (14.5 / 100) * heightShow, 3, (30 / 100) * heightShow)
+                    : _getOverlay((60 / 100) * widthShow,
+                        (12 / 100) * heightShow, 3, (23.1 / 100) * heightShow)),
                 Positioned(
                   bottom: 16,
                   left: 0,
@@ -247,7 +214,7 @@ class _CameraOverlayPageState extends State<CameraOverlayPage> {
                         if (scale < 1) scale = 1 / scale;
                         try {
                           // Take picture
-                          final XFile? image = await _controller.takePicture();
+                          final XFile image = await _controller.takePicture();
                           if (image != null) {
                             File file = File(image.path);
                             // applyRotationFix(image.path);
@@ -265,54 +232,88 @@ class _CameraOverlayPageState extends State<CameraOverlayPage> {
 
                             final double scaleX = imageWidth / previewWidth;
                             final double scaleY = imageHeight / previewHeight;
-                            var overlayRegion1;
+                            img.Image overlayRegion1 =
+                                img.copyCrop(imageDecode, 0, 0, 1, 1);
+                            ;
                             if (position1 != null) {
                               overlayRegion1 = img.copyCrop(
                                 imageDecode,
                                 (position1.dx * scaleX).toInt(),
                                 (position1.dy * scaleY).toInt(),
-                                ((width <= 720 ? 300 : 240) * scaleX).toInt(),
-                                ((width <= 720 ? 145 : 140) * scaleY).toInt(),
+                                ((width <= 720
+                                            ? (62.5 / 100) * widthShow
+                                            : 240) *
+                                        scaleX)
+                                    .toInt(),
+                                ((width <= 720 ? (30 / 100) * widthShow : 140) *
+                                        scaleY)
+                                    .toInt(),
                               );
                             } else {
                               // Handle the case where position1 is null
                               print('position1 is null');
                             }
-                            var overlayRegion2;
+                            img.Image overlayRegion2 =
+                                img.copyCrop(imageDecode, 0, 0, 1, 1);
+                            ;
                             if (position2 != null) {
                               overlayRegion2 = img.copyCrop(
                                 imageDecode,
                                 (position2.dx * scaleX).toInt(),
                                 (position2.dy * scaleY).toInt(),
-                                ((width <= 720 ? 300 : 240) * scaleX).toInt(),
-                                ((width <= 720 ? 145 : 120) * scaleY).toInt(),
+                                ((width <= 720
+                                            ? (62.5 / 100) * widthShow
+                                            : 240) *
+                                        scaleX)
+                                    .toInt(),
+                                ((width <= 720
+                                            ? (14.5 / 100) * widthShow
+                                            : 120) *
+                                        scaleY)
+                                    .toInt(),
                               );
                             } else {
                               // Handle the case where position2 is null
                               print('position1 is null');
                             }
-                            var overlayRegion3;
+                            img.Image overlayRegion3 =
+                                img.copyCrop(imageDecode, 0, 0, 1, 1);
+                            ;
                             if (position3 != null) {
                               overlayRegion3 = img.copyCrop(
                                 imageDecode,
                                 (position3.dx * scaleX).toInt(),
                                 (position3.dy * scaleY).toInt(),
-                                ((width <= 720 ? 300 : 240) * scaleX).toInt(),
-                                ((width <= 720 ? 145 : 120) * scaleY).toInt(),
+                                ((width <= 720
+                                            ? (62.5 / 100) * widthShow
+                                            : 240) *
+                                        scaleX)
+                                    .toInt(),
+                                ((width <= 720
+                                            ? (14.5 / 100) * widthShow
+                                            : 120) *
+                                        scaleY)
+                                    .toInt(),
                               );
                             } else {
                               // Handle the case where position3 is null
                               print('position1 is null');
                             }
-                            final croppedImageBytes1 = encodeImageToBytes(
-                                overlayRegion1,
-                                format: 'png');
-                            final croppedImageBytes2 = encodeImageToBytes(
-                                overlayRegion2,
-                                format: 'png');
-                            final croppedImageBytes3 = encodeImageToBytes(
-                                overlayRegion3,
-                                format: 'png');
+                            // final croppedImageBytes1 = encodeImageToBytes(
+                            //     overlayRegion1,
+                            //     format: 'png');
+                            // final croppedImageBytes2 = encodeImageToBytes(
+                            //     overlayRegion2,
+                            //     format: 'png');
+                            // final croppedImageBytes3 = encodeImageToBytes(
+                            //     overlayRegion3,
+                            //     format: 'png');
+                            final croppedImageBytes1 =
+                                img.encodeJpg(overlayRegion1, quality: 30);
+                            final croppedImageBytes2 =
+                                img.encodeJpg(overlayRegion2, quality: 30);
+                            final croppedImageBytes3 =
+                                img.encodeJpg(overlayRegion3, quality: 30);
                             // Use Navigator to go back and return the image path
                             Navigator.pop(context, {
                               "overlay1": croppedImageBytes1,
@@ -324,16 +325,16 @@ class _CameraOverlayPageState extends State<CameraOverlayPage> {
                           print('Error capturing image: $e');
                         }
                       },
-                      child: Icon(
-                        Icons.camera_alt,
-                        size: 36,
-                        color: Colors.white,
-                      ),
                       style: ElevatedButton.styleFrom(
                         shape: const CircleBorder(),
                         padding: const EdgeInsets.all(16),
                         backgroundColor: Colors.black
                             .withOpacity(0.7), // Button background color
+                      ),
+                      child: Icon(
+                        Icons.camera_alt,
+                        size: 36,
+                        color: Colors.white,
                       ),
                     ),
                   ),

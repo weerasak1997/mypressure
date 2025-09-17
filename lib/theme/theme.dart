@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 
 ThemeData lightMode = ThemeData(
   brightness: Brightness.light,
-  colorScheme: ColorScheme.light(),
+  colorScheme: const ColorScheme.light(
+    primary: Color(0xFF397E6F),
+    onPrimary: Colors.white,
+    onSurface: Colors.black,
+  ),
   switchTheme: SwitchThemeData(
     trackColor: WidgetStateProperty.resolveWith<Color?>(
       (Set<WidgetState> states) {
@@ -16,7 +20,11 @@ ThemeData lightMode = ThemeData(
 );
 ThemeData darkMode = ThemeData(
   brightness: Brightness.dark,
-  colorScheme: ColorScheme.dark(),
+  colorScheme: const ColorScheme.dark(
+    primary: Color(0xFF397E6F),
+    onPrimary: Colors.white,
+    onSurface: Colors.white,
+  ),
   switchTheme: SwitchThemeData(
     trackColor: WidgetStateProperty.resolveWith<Color?>(
       (Set<WidgetState> states) {

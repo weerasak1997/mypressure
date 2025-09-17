@@ -1,0 +1,21 @@
+{
+  "quastion-sure": "Are you sure?",
+  "quastion-detail": "Do you want to go back?",
+  "no": "No",
+  "yes": "Yes",
+  "loading": "Loading...",
+  "blood-form": "Blood Pressure Form",
+  "blood-information": "Blood Pressure Information",
+  "systolic": "Systolic",
+  "diastolic": "Diastolic",
+  "blood-pressure": "Blood pressure",
+  "submit": "Submit",
+  "menu": "Menu",
+  "logout": "Logout",
+  "select-camera": "Select Camera",
+  "confirm": "Confirm",
+  "multiple": "Multiple",
+  "single": "Single",
+  "update": "Update",
+  "new-version": "A new version of the app is available!\n Please update to the latest version\n for the best experience."
+}

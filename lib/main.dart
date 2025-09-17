@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
+import 'package:mypressure/constantProvider/constantProvider.dart';
 import 'package:mypressure/theme/theme_provider.dart';
 import 'package:mypressure/user/user_provider.dart';
 import 'package:provider/provider.dart';
@@ -10,18 +12,32 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter/foundation.dart' as Foundation;
+import 'package:in_app_update/in_app_update.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ChangeNotifierProvider(create: (_) => UserProvider()),
+      ChangeNotifierProvider(create: (_) => ConstantProvider()),
     ],
-    child: MyApp(),
+    child: EasyLocalization(
+      supportedLocales: const [Locale('en'), Locale('th')],
+      path: 'assets/lang', // path to translation files
+      fallbackLocale: const Locale('en'),
+      child: MyApp(),
+    ),
   ));
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -38,6 +54,9 @@ class _MyAppState extends State<MyApp> {
     }
     first = false;
     return MaterialApp(
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       title: 'Flutter Demo',
       theme: Provider.of<ThemeProvider>(context).themeData,
       themeMode: ThemeMode.system,
@@ -54,6 +73,8 @@ class _MyAppState extends State<MyApp> {
 }
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _SignInScreenState createState() => _SignInScreenState();
 }
@@ -94,8 +115,8 @@ class _SignInScreenState extends State<HomeScreen> {
         final response = await http.post(
             // Uri.parse('https://mypressure.the8th-floor.com/api/login/gmail'),
             Uri.parse(Platform.isAndroid
-                ? url + '/api/login/gmail'
-                : url + '/api/login/gmail'),
+                ? '$url/api/login/gmail'
+                : '$url/api/login/gmail'),
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8',
               'token':
@@ -107,6 +128,27 @@ class _SignInScreenState extends State<HomeScreen> {
               "id": account.id,
               "photoUrl": account.photoUrl,
             }));
+        Map<String, dynamic> user = jsonDecode(response.body);
+        bool update = false;
+
+        if (Foundation.defaultTargetPlatform == Foundation.TargetPlatform.iOS) {
+          print("Running on iOS");
+        } else if (Foundation.defaultTargetPlatform ==
+            Foundation.TargetPlatform.android) {
+          print("Running on Android");
+          InAppUpdate.checkForUpdate().then((info) {
+            if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+              InAppUpdate.performImmediateUpdate();
+            }
+          }).catchError((e) {
+            print("Error checking for updates: $e");
+          });
+        } else {
+          print("Running on an unknown platform");
+          // if (version != user['android_version']) {
+          //   update = true;
+          // }
+        }
         // Provider.of<UserProvider>(context, listen: false)
         //     .setUser(convertAccountToJson(account));
         //Navigator
@@ -117,7 +159,8 @@ class _SignInScreenState extends State<HomeScreen> {
                   message: 'Hello from First Screen',
                   google: _googleSignIn,
                   type: 'google',
-                  token: response.body)),
+                  token: user['token'],
+                  updated: update)),
         );
       }
     });
@@ -128,8 +171,8 @@ class _SignInScreenState extends State<HomeScreen> {
         final response = await http.post(
             // Uri.parse('https://mypressure.the8th-floor.com/api/login/gmail'),
             Uri.parse(Platform.isAndroid
-                ? url + '/api/login/apple'
-                : url + '/api/login/apple'),
+                ? '$url/api/login/apple'
+                : '$url/api/login/apple'),
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8',
               'token':
@@ -138,14 +181,40 @@ class _SignInScreenState extends State<HomeScreen> {
             body: jsonEncode({
               "idToken": prefs.getString('idToken'),
             }));
+        Map<String, dynamic> user = jsonDecode(response.body);
+        bool update = false;
+
+        PackageInfo packageInfo = await PackageInfo.fromPlatform();
+        String version = packageInfo.version;
+
+        if (Foundation.defaultTargetPlatform == Foundation.TargetPlatform.iOS) {
+          print("Running on iOS");
+        } else if (Foundation.defaultTargetPlatform ==
+            Foundation.TargetPlatform.android) {
+          print("Running on Android");
+          InAppUpdate.checkForUpdate().then((info) {
+            if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+              InAppUpdate.performImmediateUpdate();
+            }
+          }).catchError((e) {
+            print("Error checking for updates: $e");
+          });
+        } else {
+          print("Running on an unknown platform");
+          // if (version != user['android_version']) {
+          //   update = true;
+          // }
+        }
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => DetailsScreen(
-                  message: 'Hello from First Screen',
-                  google: _googleSignIn,
-                  type: 'apple',
-                  token: response.body)),
+            builder: (context) => DetailsScreen(
+              message: 'Hello from First Screen',
+              google: _googleSignIn,
+              type: 'apple',
+              token: user['toke'],
+            ),
+          ),
         );
         print('sign in');
       } else {
@@ -175,8 +244,8 @@ class _SignInScreenState extends State<HomeScreen> {
         print(user);
         final response = await http.post(
             Uri.parse(Platform.isAndroid
-                ? url + '/api/login/gmail'
-                : url + '/api/login/gmail'),
+                ? '$url/api/login/gmail'
+                : '$url/api/login/gmail'),
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8',
               'token':
@@ -195,14 +264,40 @@ class _SignInScreenState extends State<HomeScreen> {
         }
         Provider.of<UserProvider>(context, listen: false)
             .setUser(convertAccountToJson(user));
+        Map<String, dynamic> useres = jsonDecode(response.body);
+        bool update = false;
+
+        PackageInfo packageInfo = await PackageInfo.fromPlatform();
+        String version = packageInfo.version;
+
+        if (Foundation.defaultTargetPlatform == Foundation.TargetPlatform.iOS) {
+          print("Running on iOS");
+        } else if (Foundation.defaultTargetPlatform ==
+            Foundation.TargetPlatform.android) {
+          print("Running on Android");
+          InAppUpdate.checkForUpdate().then((info) {
+            if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+              InAppUpdate.performImmediateUpdate();
+            }
+          }).catchError((e) {
+            print("Error checking for updates: $e");
+          });
+        } else {
+          print("Running on an unknown platform");
+          // if (version != user['android_version']) {
+          //   update = true;
+          // }
+        }
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => DetailsScreen(
-                  message: 'Hello from First Screen',
-                  google: _googleSignIn,
-                  type: 'google',
-                  token: response.body)),
+            builder: (context) => DetailsScreen(
+              message: 'Hello from First Screen',
+              google: _googleSignIn,
+              type: 'google',
+              token: useres['token'],
+            ),
+          ),
         );
       }
     } catch (error) {
@@ -217,7 +312,9 @@ class _SignInScreenState extends State<HomeScreen> {
     await prefs.setBool('isSignedIn', false);
   }
 
+  @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     GoogleSignInAccount? user = _currentUser;
     return Scaffold(
       // appBar: AppBar(
@@ -227,6 +324,12 @@ class _SignInScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Image.asset(
+              'assets/logo_inside.png',
+              height: screenWidth * 0.8, // Adjust size as needed
+              width: screenWidth * 0.8,
+            ),
+            SizedBox(height: screenWidth * 0.2),
             user == null
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -238,7 +341,7 @@ class _SignInScreenState extends State<HomeScreen> {
                           ),
                     ],
                   )
-                : Text('')
+                : const Text('')
             // Column(
             //     mainAxisAlignment: MainAxisAlignment.center,
             //     children: [
@@ -264,7 +367,7 @@ class GoogleLoginButton extends StatelessWidget {
   // String url =
   //     Platform.isAndroid ? 'http://10.0.2.2:8000' : 'http://127.0.0.1:8000';
   String url = 'https://mypressure.the8th-floor.com';
-  GoogleLoginButton({required this.onPressed});
+  GoogleLoginButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -331,8 +434,8 @@ class GoogleLoginButton extends StatelessWidget {
                   print(credential.userIdentifier);
                   final response = await http.post(
                       Uri.parse(Platform.isAndroid
-                          ? url + '/api/login/apple'
-                          : url + '/api/login/apple'),
+                          ? '$url/api/login/apple'
+                          : '$url/api/login/apple'),
                       headers: <String, String>{
                         'Content-Type': 'application/json; charset=UTF-8',
                         'token':
@@ -363,30 +466,3 @@ class GoogleLoginButton extends StatelessWidget {
     ]);
   }
 }
-
-// class AppleButton extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Center(
-//           child: SignInWithAppleButton(
-//             onPressed: () async {
-//               try {
-//                 final credential = await SignInWithApple.getAppleIDCredential(
-//                   scopes: [
-//                     AppleIDAuthorizationScopes.email,
-//                     AppleIDAuthorizationScopes.fullName,
-//                   ],
-//                 );
-
-//                 print(credential);
-//                 // Handle credential (send to your server or authenticate user)
-//               } catch (error) {
-//                 print(error);
-//                 // Handle error
-//               }
-//             },
-//         ),
-//       ),
-//     );
-//   }
-// }

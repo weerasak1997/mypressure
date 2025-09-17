@@ -8,7 +8,7 @@
 PRODUCT_NAME = mypressure
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = mypressure.test.com
+PRODUCT_BUNDLE_IDENTIFIER = com8th.abc.health
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2024 com.example. All rights reserved.
